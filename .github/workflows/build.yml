@@ -35,6 +35,8 @@ jobs:
     # 关键：让 job 在指定镜像内跑
     container:
       image: ${{ matrix.distro }}
+    env:
+      DEBIAN_FRONTEND: noninteractive
 
     steps:
       - name: Checkout
