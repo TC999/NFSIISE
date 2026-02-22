@@ -16,7 +16,7 @@ jobs:
         distro:
           - ubuntu:20.04
           - ubuntu:22.04
-          #- ubuntu:24.04
+          - ubuntu:24.04
           #- debian10
           #- debian11
           #- debian12
@@ -46,7 +46,7 @@ jobs:
         run: |
           dpkg --add-architecture ${{ matrix.arch.arch_name }}
           apt-get update
-          apt-get install libsdl2-dev:${{ matrix.arch.arch_name }} gcc-multilib yasm -y
+          apt-get install libsdl2-dev:${{ matrix.arch.arch_name }} yasm clang gcc g++ make -y
 
       - name: Compile
         shell: bash
