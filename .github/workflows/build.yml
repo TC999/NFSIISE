@@ -46,7 +46,7 @@ jobs:
         run: |
           dpkg --add-architecture ${{ matrix.arch.arch_name }}
           apt-get update
-          apt-get install libsdl2-dev:${{ matrix.arch.arch_name }} yasm clang gcc g++ make -y
+          apt-get install libsdl2-dev:${{ matrix.arch.arch_name }} yasm clang gcc g++ make lld:${{ matrix.arch.arch_name }} -y
 
       - name: Compile
         shell: bash
