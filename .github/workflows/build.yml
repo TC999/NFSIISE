@@ -7,8 +7,8 @@ on:
 
 jobs:
   build-linux:
-    name: build-${{ matrix.distro }}-${{ matrix.arch }}
-    runs-on: ubuntu-latest
+    name: build-${{ matrix.distro }}-${{ matrix.arch.arch }}
+    runs-on: ${{ matrix.arch.os }}
 
     strategy:
       fail-fast: false
@@ -17,126 +17,44 @@ jobs:
           - ubuntu-20.04
           - ubuntu-22.04
           - ubuntu-24.04
-          - debian10
-          - debian11
-          - debian12
-          - debian13
+          #- debian10
+          #- debian11
+          #- debian12
+          #- debian13
         arch:
-          - x86
-          - armhf
-        include:
-          # x86 (在容器内直接跑 amd64 镜像)
-          - distro: ubuntu-20.04
-            arch: x86
-            image: ubuntu:20.04
-            platform: linux/amd64
-            cmd: ./compile_nfs
-
-          - distro: ubuntu-22.04
-            arch: x86
-            image: ubuntu:22.04
-            platform: linux/amd64
-            cmd: ./compile_nfs
-
-          - distro: ubuntu-24.04
-            arch: x86
-            image: ubuntu:24.04
-            platform: linux/amd64
-            cmd: ./compile_nfs
-
-          - distro: debian10
-            arch: x86
-            image: debian:10
-            platform: linux/amd64
-            cmd: ./compile_nfs
-
-          - distro: debian11
-            arch: x86
-            image: debian:11
-            platform: linux/amd64
-            cmd: ./compile_nfs
-
-          - distro: debian12
-            arch: x86
-            image: debian:12
-            platform: linux/amd64
-            cmd: ./compile_nfs
-
-          - distro: debian13
-            arch: x86
-            image: debian:13
-            platform: linux/amd64
-            cmd: ./compile_nfs
-
-          # armhf (使用 arm32v7 镜像 + QEMU)
-          - distro: ubuntu-20.04
-            arch: armhf
-            image: arm32v7/ubuntu:20.04
-            platform: linux/arm/v7
-            cmd: ./compile_nfs cpp
-
-          - distro: ubuntu-22.04
-            arch: armhf
-            image: arm32v7/ubuntu:22.04
-            platform: linux/arm/v7
-            cmd: ./compile_nfs cpp
-
-          - distro: ubuntu-24.04
-            arch: armhf
-            image: arm32v7/ubuntu:24.04
-            platform: linux/arm/v7
-            cmd: ./compile_nfs cpp
-
-          - distro: debian10
-            arch: armhf
-            image: arm32v7/debian:10
-            platform: linux/arm/v7
-            cmd: ./compile_nfs cpp
-
-          - distro: debian11
-            arch: armhf
-            image: arm32v7/debian:11
-            platform: linux/arm/v7
-            cmd: ./compile_nfs cpp
-
-          - distro: debian12
-            arch: armhf
-            image: arm32v7/debian:12
-            platform: linux/arm/v7
-            cmd: ./compile_nfs cpp
-
-          - distro: debian13
-            arch: armhf
-            image: arm32v7/debian:13
-            platform: linux/arm/v7
-            cmd: ./compile_nfs cpp
+          - arch: x86
+            arch_name: i386
+            os: ubuntu-latest
+            build: ./compile_nfs
+          - arch: arm
+            arch_name: armhf
+            os: ubuntu-24.04-arm
+            build: ./compile_nfs cpp
+        
 
     # 关键：让 job 在指定镜像内跑
     container:
-      image: ${{ matrix.image }}
-      options: --platform=${{ matrix.platform }}
+      image: ${{ matrix.distro }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # armhf 需要 QEMU；x86 这步会快速跳过
-      - name: Set up QEMU (for armhf)
-        if: matrix.arch == 'armhf'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm
-
-      # 你的脚本可能依赖 bash/coreutils 等；一般基础镜像都有。
-      # 这里主要保证脚本可执行。
-      - name: Prepare
+      - name: Install dependencies
         run: |
-          chmod +x ./compile_nfs || true
-          ls -la
+          dpkg --add-architecture ${{ matrix.arch.arch_name }}
+          apt-get update
+          apt-get install libsdl2-dev:${{ matrix.arch.arch_name }} gcc-multilib yasm
 
       - name: Compile
         run: |
           echo "Distro: ${{ matrix.distro }}"
           echo "Arch:   ${{ matrix.arch }}"
           uname -a
-          ${{ matrix.cmd }}
+          ${{ matrix.arch.build }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.distro }}-${{ matrix.arch.arch}}
+          path: 'Need For Speed II SE'
