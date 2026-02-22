@@ -1,7 +1,7 @@
 name: Build
 
 on:
-  #push:
+  push:
   #pull_request:
   workflow_dispatch:
 
@@ -14,9 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         distro:
-          - ubuntu-20.04
-          - ubuntu-22.04
-          - ubuntu-24.04
+          - ubuntu:20.04
+          - ubuntu:22.04
+          - ubuntu:24.04
           #- debian10
           #- debian11
           #- debian12
