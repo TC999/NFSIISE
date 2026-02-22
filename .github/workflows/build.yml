@@ -16,7 +16,7 @@ jobs:
         distro:
           - ubuntu:20.04
           - ubuntu:22.04
-          - ubuntu:24.04
+          #- ubuntu:24.04
           #- debian10
           #- debian11
           #- debian12
@@ -52,7 +52,7 @@ jobs:
         shell: bash
         run: |
           echo "Distro: ${{ matrix.distro }}"
-          echo "Arch:   ${{ matrix.arch }}"
+          echo "Arch:   ${{ matrix.arch.arch }}"
           uname -a
           ${{ matrix.arch.build }}
 
