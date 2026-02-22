@@ -39,6 +39,8 @@ jobs:
       DEBIAN_FRONTEND: noninteractive
 
     steps:
+      - name: Upgrade Git
+        run: apt-get update && apt-get install git -y
       - name: Checkout
         uses: actions/checkout@v4
         with:
