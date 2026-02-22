@@ -1,0 +1,142 @@
+name: Build
+
+on:
+  #push:
+  #pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-linux:
+    name: build-${{ matrix.distro }}-${{ matrix.arch }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - ubuntu-20.04
+          - ubuntu-22.04
+          - ubuntu-24.04
+          - debian10
+          - debian11
+          - debian12
+          - debian13
+        arch:
+          - x86
+          - armhf
+        include:
+          # x86 (在容器内直接跑 amd64 镜像)
+          - distro: ubuntu-20.04
+            arch: x86
+            image: ubuntu:20.04
+            platform: linux/amd64
+            cmd: ./compile_nfs
+
+          - distro: ubuntu-22.04
+            arch: x86
+            image: ubuntu:22.04
+            platform: linux/amd64
+            cmd: ./compile_nfs
+
+          - distro: ubuntu-24.04
+            arch: x86
+            image: ubuntu:24.04
+            platform: linux/amd64
+            cmd: ./compile_nfs
+
+          - distro: debian10
+            arch: x86
+            image: debian:10
+            platform: linux/amd64
+            cmd: ./compile_nfs
+
+          - distro: debian11
+            arch: x86
+            image: debian:11
+            platform: linux/amd64
+            cmd: ./compile_nfs
+
+          - distro: debian12
+            arch: x86
+            image: debian:12
+            platform: linux/amd64
+            cmd: ./compile_nfs
+
+          - distro: debian13
+            arch: x86
+            image: debian:13
+            platform: linux/amd64
+            cmd: ./compile_nfs
+
+          # armhf (使用 arm32v7 镜像 + QEMU)
+          - distro: ubuntu-20.04
+            arch: armhf
+            image: arm32v7/ubuntu:20.04
+            platform: linux/arm/v7
+            cmd: ./compile_nfs cpp
+
+          - distro: ubuntu-22.04
+            arch: armhf
+            image: arm32v7/ubuntu:22.04
+            platform: linux/arm/v7
+            cmd: ./compile_nfs cpp
+
+          - distro: ubuntu-24.04
+            arch: armhf
+            image: arm32v7/ubuntu:24.04
+            platform: linux/arm/v7
+            cmd: ./compile_nfs cpp
+
+          - distro: debian10
+            arch: armhf
+            image: arm32v7/debian:10
+            platform: linux/arm/v7
+            cmd: ./compile_nfs cpp
+
+          - distro: debian11
+            arch: armhf
+            image: arm32v7/debian:11
+            platform: linux/arm/v7
+            cmd: ./compile_nfs cpp
+
+          - distro: debian12
+            arch: armhf
+            image: arm32v7/debian:12
+            platform: linux/arm/v7
+            cmd: ./compile_nfs cpp
+
+          - distro: debian13
+            arch: armhf
+            image: arm32v7/debian:13
+            platform: linux/arm/v7
+            cmd: ./compile_nfs cpp
+
+    # 关键：让 job 在指定镜像内跑
+    container:
+      image: ${{ matrix.image }}
+      options: --platform=${{ matrix.platform }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # armhf 需要 QEMU；x86 这步会快速跳过
+      - name: Set up QEMU (for armhf)
+        if: matrix.arch == 'armhf'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm
+
+      # 你的脚本可能依赖 bash/coreutils 等；一般基础镜像都有。
+      # 这里主要保证脚本可执行。
+      - name: Prepare
+        run: |
+          chmod +x ./compile_nfs || true
+          ls -la
+
+      - name: Compile
+        run: |
+          echo "Distro: ${{ matrix.distro }}"
+          echo "Arch:   ${{ matrix.arch }}"
+          uname -a
+          ${{ matrix.cmd }}
