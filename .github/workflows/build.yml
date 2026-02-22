@@ -15,17 +15,17 @@ jobs:
       matrix:
         distro:
           - ubuntu:20.04
-          - ubuntu:22.04
-          - ubuntu:24.04
+          #- ubuntu:22.04
+          #- ubuntu:24.04
           #- debian10
           #- debian11
           #- debian12
           #- debian13
         arch:
-          - arch: x86
-            arch_name: i386
-            os: ubuntu-latest
-            build: ./compile_nfs
+          #- arch: x86
+          #  arch_name: i386
+          #  os: ubuntu-latest
+          #  build: ./compile_nfs
           - arch: arm
             arch_name: armhf
             os: ubuntu-24.04-arm
