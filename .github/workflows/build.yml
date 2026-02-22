@@ -44,9 +44,10 @@ jobs:
         run: |
           dpkg --add-architecture ${{ matrix.arch.arch_name }}
           apt-get update
-          apt-get install libsdl2-dev:${{ matrix.arch.arch_name }} gcc-multilib yasm
+          apt-get install libsdl2-dev:${{ matrix.arch.arch_name }} gcc-multilib yasm -y
 
       - name: Compile
+        shell: bash
         run: |
           echo "Distro: ${{ matrix.distro }}"
           echo "Arch:   ${{ matrix.arch }}"
